@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spread The Green | Prospecção</title>
+<link rel="icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-base: #09090b; --bg-surface: #121214; --bg-card: #18181b;
+    --text-main: #f4f4f5; --text-muted: #8e8e99; --text-dim: #52525b;
+    --border: #27272a; --border-light: rgba(255, 255, 255, 0.04);
+    --accent: #10b981; --accent-glow: rgba(16, 185, 129, 0.15); --accent-hover: #059669; 
+    --success: #10b981; --error: #ef4444; --warning: #f59e0b; 
+    --twitter: #1d9bf0; --discord: #5865F2; --instagram: #E1306C; --twitch: #9146FF;
+    --radius: 10px; --radius-sm: 6px;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+  body { background-color: var(--bg-base); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; -webkit-font-smoothing: antialiased; }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+  /* SIDEBAR REFORMULADA (MELHOR UX) */
+  .sidebar { width: 350px; background-color: var(--bg-surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
+  .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border-light); }
+  .brand { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; color: var(--text-main); letter-spacing: -0.5px;}
+  .brand span { width: 10px; height: 10px; background-color: var(--accent); border-radius: 3px; box-shadow: 0 0 12px var(--accent-glow); }
+  
+  .sidebar-content { padding: 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px; }
+  
+  .form-section { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+  .form-section-title { font-size: 10px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: -4px;}
+
+  .input-group { display: flex; flex-direction: column; gap: 6px; }
+  .input-group label { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+  
+  input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type="number"] { appearance: textfield; -webkit-appearance: textfield; -moz-appearance: textfield; }
+
+  .input-group textarea, .input-group input, .input-group select { 
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; background: var(--bg-base); color: var(--text-main); transition: all 0.2s ease; font-family: 'Inter', sans-serif; resize: vertical;
+  }
+  
+  select, .status-select {
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238e8e99%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat; background-position: right 10px center; background-size: 14px; padding-right: 32px; cursor: pointer;
+  }
+
+  .input-group textarea:focus, .input-group input:focus, .input-group select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
+  .row { display: flex; gap: 12px; }
+  .row > div { flex: 1; }
+
+  /* BOTÕES E PROGRESSO */
+  .action-area { position: sticky; bottom: 0; background: var(--bg-surface); padding: 16px 20px; border-top: 1px solid var(--border); z-index: 20; }
+  
+  .btn { width: 100%; padding: 12px; border: none; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; }
+  .btn-primary { background: var(--text-main); color: var(--bg-base); }
+  .btn-primary:hover:not(:disabled) { background: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,255,255,0.1); }
+  
+  .search-active-panel { display: none; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; flex-direction: column; gap: 12px; }
+  .progress-info { display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; color: var(--text-muted); }
+  .progress-bar-bg { width: 100%; height: 6px; background: var(--bg-base); border-radius: 4px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s ease; box-shadow: 0 0 8px var(--accent-glow);}
+  .btn-cancel { background: rgba(239, 68, 68, 0.1); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.2); }
+  .btn-cancel:hover { background: rgba(239, 68, 68, 0.2); border-color: var(--error); }
+
+  /* CONSOLE */
+  .console-box { background: var(--bg-base); border-radius: var(--radius-sm); padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted); height: 120px; display: flex; flex-direction: column; border: 1px solid var(--border-light);}
+  .console-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px dashed var(--border); }
+  .console-title { font-weight: bold; text-transform: uppercase; color: var(--text-dim); }
+  .btn-copy { background: transparent; border: none; color: var(--text-muted); cursor: pointer; transition: 0.2s;}
+  .btn-copy:hover { color: var(--text-main); }
+  .sys-logs { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .log-line { line-height: 1.4; word-wrap: break-word; }
+  .log-error { color: var(--error); }
+  .log-success { color: var(--success); }
+  .log-warn { color: var(--warning); }
+  .log-info { color: #3b82f6; }
+
+  /* MAIN E KANBAN */
+  .main { flex: 1; display: flex; flex-direction: column; position: relative; }
+  .header { height: 64px; background-color: var(--bg-base); display: flex; align-items: center; padding: 0 32px; justify-content: space-between; border-bottom: 1px solid var(--border-light);}
+  .mode-tabs { display: flex; gap: 24px; align-items: center; height: 100%;}
+  .tab-btn { height: 100%; background: transparent; border: none; color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; position: relative; }
+  .tab-btn:hover { color: var(--text-main); }
+  .tab-btn.active { color: var(--accent); }
+  .tab-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: var(--accent); border-radius: 2px 2px 0 0; }
+
+  .view-controls { display: flex; gap: 4px; background: var(--bg-surface); padding: 4px; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+  .view-btn { background: transparent; border: none; color: var(--text-muted); padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; transition: 0.2s; }
+  .view-btn.active { background: var(--border); color: var(--text-main); }
+
+  .content-area { padding: 32px; overflow-y: auto; height: calc(100vh - 64px); display: none; }
+  .content-area.active { display: block; }
+  
+  .view-icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; align-content: flex-start; }
+  .view-list { display: flex; flex-direction: column; gap: 12px; }
+  
+  .card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius); transition: all 0.2s ease; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+  .card:hover { border-color: rgba(16, 185, 129, 0.4); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+  
+  .social-container { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+  .soc-badge { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 4px; font-size: 9px; font-weight: 700; text-transform: uppercase; text-decoration: none; transition: 0.2s; border: 1px solid transparent; letter-spacing: 0.5px;}
+  .soc-tw { background: rgba(29, 155, 240, 0.1); color: var(--twitter); border-color: rgba(29, 155, 240, 0.2); }
+  .soc-twc { background: rgba(145, 70, 255, 0.1); color: var(--twitch); border-color: rgba(145, 70, 255, 0.2); }
+  .soc-ig { background: rgba(225, 48, 108, 0.1); color: var(--instagram); border-color: rgba(225, 48, 108, 0.2); }
+  .soc-dc { background: rgba(88, 101, 242, 0.1); color: var(--discord); border-color: rgba(88, 101, 242, 0.2); }
+  .soc-none { background: transparent; color: var(--text-dim); border-color: var(--border); font-weight: 600;}
+
+  .view-icons .card { padding: 24px; align-items: center; text-align: center; }
+  .view-icons .avatar { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; margin-bottom: 12px; background-color: var(--bg-base); border: 1px solid var(--border);}
+  .view-icons .badge { position: absolute; top: 12px; right: 12px; padding: 4px 8px; border-radius: 4px; font-size: 9px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; background: var(--accent-glow); color: var(--success); }
+  .view-icons h3 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .view-icons h3 a { color: var(--text-main); text-decoration: none;}
+  .view-icons .subs-count { font-size: 11px; font-weight: 500; color: var(--text-muted); margin-bottom: 16px; }
+  .analysis-box { background: var(--bg-base); padding: 12px; border-radius: var(--radius-sm); font-size: 11px; color: var(--text-muted); width: 100%; text-align: left; margin-top: auto; line-height: 1.5; border: 1px solid var(--border-light);}
+  
+  .view-list .card { flex-direction: row; align-items: center; padding: 16px 20px; text-align: left; }
+  .view-list .avatar { width: 44px; height: 44px; border-radius: 50%; margin-right: 16px; border: 1px solid var(--border);}
+  .view-list .card-info { flex: 0 0 220px; }
+  .view-list h3 { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .view-list h3 a { color: var(--text-main); text-decoration: none; }
+  .view-list .subs-count { font-size: 11px; color: var(--text-muted); }
+  .view-list .analysis-box { flex: 1; margin: 0 0 0 20px; padding: 10px; background: transparent; border: none;}
+  .view-list .badge { margin-left: 20px; font-size: 9px; padding: 4px 8px; border-radius: 4px; background: var(--accent-glow); color: var(--success); font-weight: 700; text-transform: uppercase;}
+
+  #history-view { display: none; padding: 32px 40px; height: calc(100vh - 64px); overflow-y: hidden; flex-direction: column; background: var(--bg-base); }
+  #history-view.active { display: flex; }
+  
+  /* FILTROS KANBAN REFINADOS */
+  .kanban-filters { display: flex; gap: 20px; padding: 0 0 20px 0; border-bottom: 1px solid var(--border-light); margin-bottom: 20px; align-items: center;}
+  .kf-group { display: flex; flex-direction: row; align-items: center; gap: 8px; }
+  .kf-group label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+  .kf-group input[type="number"] { width: 100px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg-surface); color: var(--text-main); font-size: 11px;}
+  
+  .kf-checkbox-wrapper { margin-left: auto; display: flex; align-items: center; gap: 8px; background: var(--bg-surface); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); cursor: pointer;}
+  .kf-checkbox-wrapper input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 14px; height: 14px; border: 1.5px solid var(--text-muted); border-radius: 3px; background: transparent; cursor: pointer; position: relative;}
+  .kf-checkbox-wrapper input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
+  .kf-checkbox-wrapper input[type="checkbox"]:checked::after { content: ''; position: absolute; left: 3px; top: 1px; width: 3px; height: 7px; border: solid var(--bg-base); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  .kf-checkbox-wrapper label { margin: 0; cursor: pointer; font-size: 11px; color: var(--text-main); font-weight: 500; }
+
+  .kanban-board { display: flex; gap: 20px; flex: 1; overflow-x: auto; overflow-y: hidden; padding-bottom: 8px;}
+  .kanban-col { flex: 1; min-width: 300px; max-width: 340px; display: flex; flex-direction: column; overflow: hidden;}
+  .kanban-header { padding: 0 0 12px 0; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; color: var(--text-muted);}
+  .kanban-header span { background: var(--bg-surface); padding: 2px 6px; border-radius: 4px; font-size: 10px; color: var(--text-main); border: 1px solid var(--border);}
+  .kanban-body { flex: 1; padding: 2px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+  
+  .kanban-card { background: var(--bg-surface); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 16px; position: relative; transition: all 0.2s ease;}
+  .kanban-card:hover { border-color: rgba(255,255,255,0.1); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2);}
+  .kanban-card.fav { border-color: var(--warning); background: rgba(245, 158, 11, 0.03); }
+  
+  .kanban-card .avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-light);}
+  .kanban-card h3 { font-size: 13px; font-weight: 600; margin-bottom: 2px; padding-right: 28px; }
+  .kanban-card h3 a { color: var(--text-main); text-decoration: none;}
+  
+  .status-select { width: 100%; margin-top: 12px; padding: 8px 10px; background: var(--bg-base); color: var(--text-main); border: 1px solid var(--border); border-radius: 4px; font-size: 11px;}
+  
+  .btn-fav { position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 16px; cursor: pointer; color: var(--border); transition: all 0.2s ease; z-index: 2; }
+  .btn-fav.active { color: var(--warning); filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.4)); }
+  .btn-fav:hover { transform: scale(1.1); color: var(--warning); }
+
+  .empty-state { text-align: center; color: var(--text-dim); padding: 60px 20px; grid-column: 1 / -1; width: 100%; font-size: 13px; display: flex; flex-direction: column; align-items: center; gap: 12px;}
+  .empty-state svg { width: 48px; height: 48px; opacity: 0.5; }
+  .btn-clear-mem { background: transparent; border: none; color: var(--text-dim); font-size: 10px; text-decoration: underline; cursor: pointer; margin-top: 8px; text-align: center; width: 100%;}
+  .btn-clear-mem:hover { color: var(--error); }
+</style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand"><span></span> EDITOR'S CRM</div>
+    </div>
+    
+    <div class="sidebar-content">
+      <div class="form-section">
+        <span class="form-section-title">Estratégia</span>
+        <div class="input-group">
+          <label>Plataforma</label>
+          <select id="inp-source">
+            <option value="youtube">🔴 YouTube (Vídeos)</option>
+            <option value="twitch">🟣 Twitch (Ao Vivo)</option>
+            <option value="twitter">🐦 Twitter (Vagas)</option>
+          </select>
+        </div>
+        <div class="input-group" id="group-analysis-mode">
+          <label>Modo de Análise</label>
+          <select id="inp-analysis-mode">
+            <option value="fast">⚡ Rápida (Sem Limites)</option>
+            <option value="gemini">🧠 Profunda (IA Gemini)</option>
+          </select>
+        </div>
+        <div class="input-group" id="group-youtube-key">
+          <label>Chave API (YouTube Data v3)</label>
+          <input type="password" id="inp-youtube-key" placeholder="AIzaSy...">
+        </div>
+        <div class="input-group" id="group-gemini-key" style="display: none;">
+          <label>Chave API (Gemini)</label>
+          <input type="password" id="inp-gemini-key" placeholder="AIzaSy...">
+        </div>
+        <div id="twitch-keys" style="display: none; background: rgba(145, 70, 255, 0.05); padding: 12px; border-radius: var(--radius-sm); border: 1px solid rgba(145, 70, 255, 0.15);">
+          <div class="input-group" style="margin-bottom: 8px;">
+            <label style="color: var(--twitch);">Twitch Client ID</label>
+            <input type="password" id="inp-twitch-id">
+          </div>
+          <div class="input-group" style="margin-bottom: 0;">
+            <label style="color: var(--twitch);">Twitch Client Secret</label>
+            <input type="password" id="inp-twitch-secret">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section" id="section-search-params">
+        <span class="form-section-title">Parâmetros de Busca</span>
+        <div class="input-group">
+          <label>Termo Base / Nome do Jogo</label>
+          <textarea id="inp-queries" rows="1">Minecraft</textarea>
+        </div>
+        
+        <div class="row" id="row-lang-meta">
+          <div class="input-group">
+            <label>Idioma</label>
+            <select id="inp-lang">
+              <option value="inglês">Inglês (EN)</option>
+              <option value="espanhol">Espanhol (ES)</option>
+              <option value="português">Português (PT)</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Meta de Canais</label>
+            <input type="number" id="inp-max-results" value="8" min="1">
+          </div>
+        </div>
+
+        <div class="row" id="row-subs-filter">
+          <div class="input-group">
+            <label id="lbl-min">Min. Subs</label>
+            <input type="number" id="inp-min-subs" value="1000">
+          </div>
+          <div class="input-group">
+            <label id="lbl-max">Max. Subs</label>
+            <input type="number" id="inp-max-subs" value="500000">
+          </div>
+        </div>
+
+        <div class="row" id="group-pages">
+          <div class="input-group">
+            <label>Páginas (YT) — 100 cota cada</label>
+            <input type="number" id="inp-pages" value="1" min="1" max="10">
+          </div>
+          <div class="input-group">
+            <label>Duração (Máx min)</label>
+            <input type="number" id="inp-max-duration" value="240" min="10">
+          </div>
+        </div>
+        
+        <div class="input-group" id="group-excluded">
+          <label>Ignorar Títulos com:</label>
+          <input type="text" id="inp-excluded" value="100 days, multiplayer, smp">
+        </div>
+      </div>
+      
+      <div class="console-box">
+        <div class="console-header">
+          <span class="console-title">System Logs</span>
+          <button id="btn-copy-log" class="btn-copy">Copiar</button>
+        </div>
+        <div id="sys-console" class="sys-logs">
+          <div class="log-line log-info">Mesa de Projetos Carregada.</div>
+        </div>
+      </div>
+
+      <button class="btn-clear-mem" id="btn-clear">Limpar Memória do CRM</button>
+    </div>
+
+    <div class="action-area">
+      <button class="btn btn-primary" id="btn-start">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        Iniciar Prospecção
+      </button>
+      
+      <div class="search-active-panel" id="panel-progress">
+        <div class="progress-info">
+          <span id="progress-text">Processando...</span>
+          <span id="progress-pct">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progress-bar"></div>
+        </div>
+        <button class="btn btn-cancel" id="btn-cancel">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+          Parar Busca
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div class="mode-tabs">
+        <button class="tab-btn active" id="tab-live">Radar Ao Vivo</button>
+        <button class="tab-btn" id="tab-history">Quadro de Projetos</button>
+      </div>
+      <div class="view-controls" id="view-controls-live">
+        <button class="view-btn active" data-view="view-icons">Grade</button>
+        <button class="view-btn" data-view="view-list">Lista</button>
+      </div>
+    </header>
+    
+    <div class="content-area active" id="live-view">
+      <div class="view-icons" id="grid">
+        <div class="empty-state">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <p>O radar está vazio.<br>Configure os parâmetros e inicie a prospecção.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="history-view">
+      <div class="kanban-filters">
+        <div class="kf-group">
+          <label>Mínimo Subs</label>
+          <input type="number" id="kf-min-subs" placeholder="Ex: 5000">
+        </div>
+        <div class="kf-group">
+          <label>Máximo Subs</label>
+          <input type="number" id="kf-max-subs" placeholder="Ex: 500000">
+        </div>
+        <label class="kf-checkbox-wrapper" for="kf-has-contact">
+          <input type="checkbox" id="kf-has-contact">
+          <label for="kf-has-contact">Mostrar Só Com Contato</label>
+        </label>
+      </div>
+
+      <div class="kanban-board">
+        <div class="kanban-col">
+          <div class="kanban-header">Novos Canais <span id="count-canal">0</span></div>
+          <div class="kanban-body" id="col-canal"></div>
+        </div>
+        <div class="kanban-col">
+          <div class="kanban-header">Abordados <span id="count-contacted" style="color:var(--twitter); border-color: rgba(29, 155, 240, 0.2);">0</span></div>
+          <div class="kanban-body" id="col-contacted"></div>
+        </div>
+        <div class="kanban-col">
+          <div class="kanban-header">Fazendo Teste <span id="count-negotiating" style="color:var(--warning); border-color: rgba(245, 158, 11, 0.2);">0</span></div>
+          <div class="kanban-body" id="col-negotiating"></div>
+        </div>
+        <div class="kanban-col">
+          <div class="kanban-header">Projeto Fechado <span id="count-closed" style="color:var(--success); border-color: rgba(16, 185, 129, 0.2);">0</span></div>
+          <div class="kanban-body" id="col-closed"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+<script>
+  const DOM = { 
+    liveView: document.getElementById('live-view'),
+    historyView: document.getElementById('history-view'),
+    grid: document.getElementById('grid'), 
+    btnStart: document.getElementById('btn-start'), 
+    btnCancel: document.getElementById('btn-cancel'),
+    panelProgress: document.getElementById('panel-progress'),
+    progText: document.getElementById('progress-text'),
+    progPct: document.getElementById('progress-pct'),
+    progBar: document.getElementById('progress-bar'),
+    btnClear: document.getElementById('btn-clear'),
+    console: document.getElementById('sys-console'),
+    btnCopyLog: document.getElementById('btn-copy-log'),
+    inpAnalysisMode: document.getElementById('inp-analysis-mode'),
+    groupGeminiKey: document.getElementById('group-gemini-key'),
+    geminiInput: document.getElementById('inp-gemini-key'),
+    youtubeInput: document.getElementById('inp-youtube-key'),
+    inpSource: document.getElementById('inp-source'),
+    inpLang: document.getElementById('inp-lang'), 
+    inpTwitchId: document.getElementById('inp-twitch-id'),
+    inpTwitchSecret: document.getElementById('inp-twitch-secret'),
+    inpMinSubs: document.getElementById('inp-min-subs'),
+    inpMaxSubs: document.getElementById('inp-max-subs'),
+    inpMaxResults: document.getElementById('inp-max-results'),
+    inpPages: document.getElementById('inp-pages'),
+    inpMaxDuration: document.getElementById('inp-max-duration'),
+    sectionSearchParams: document.getElementById('section-search-params'),
+    viewBtns: document.querySelectorAll('.view-btn'),
+    tabLive: document.getElementById('tab-live'),
+    tabHistory: document.getElementById('tab-history'),
+    viewControlsLive: document.getElementById('view-controls-live'),
+    kfMinSubs: document.getElementById('kf-min-subs'),
+    kfMaxSubs: document.getElementById('kf-max-subs'),
+    kfHasContact: document.getElementById('kf-has-contact')
+  };
+  
+  let seenChannels = new Set(JSON.parse(localStorage.getItem('crm_seen') || '[]'));
+  let approvedLeads = JSON.parse(localStorage.getItem('crm_leads') || '[]');
+  let workingModel = null; 
+  let currentAbortController = null; 
+
+  DOM.inpAnalysisMode.addEventListener('change', () => {
+    DOM.groupGeminiKey.style.display = DOM.inpAnalysisMode.value === 'gemini' ? 'flex' : 'none';
+  });
+  
+  DOM.inpSource.addEventListener('change', () => {
+    const s = DOM.inpSource.value;
+    const isTwitch = s === 'twitch';
+    const isTwitter = s === 'twitter';
+    
+    document.getElementById('lbl-min').textContent = isTwitch ? 'Min. Followers' : 'Min. Subs';
+    document.getElementById('lbl-max').textContent = isTwitch ? 'Max. Followers' : 'Max. Subs';
+    document.getElementById('twitch-keys').style.display = isTwitch ? 'block' : 'none';
+    
+    document.getElementById('group-analysis-mode').style.display = isTwitter ? 'none' : 'flex';
+    DOM.groupGeminiKey.style.display = (DOM.inpAnalysisMode.value === 'gemini' && !isTwitter) ? 'flex' : 'none';
+    
+    // Controle fino do que aparece no Twitch vs YouTube
+    document.getElementById('group-pages').style.display = (isTwitch || isTwitter) ? 'none' : 'flex';
+    document.getElementById('row-lang-meta').style.display = isTwitter ? 'none' : 'flex';
+    document.getElementById('row-subs-filter').style.display = isTwitter ? 'none' : 'flex';
+    document.getElementById('group-excluded').style.display = isTwitter ? 'none' : 'flex';
+
+    if(isTwitter) {
+      DOM.btnStart.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg> Abrir Radar Twitter`;
+    } else {
+      DOM.btnStart.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Iniciar Prospecção`;
+    }
+  });
+
+  approvedLeads = approvedLeads.map(lead => {
+    if (!lead.id) lead.id = 'id_' + Math.random().toString(36).substring(2, 10);
+    if (typeof lead.favorite === 'undefined') lead.favorite = false;
+    if (!lead.status) lead.status = 'canal';
+    return lead;
+  });
+  localStorage.setItem('crm_leads', JSON.stringify(approvedLeads));
+
+  DOM.geminiInput.value = localStorage.getItem('crm_key') || '';
+  DOM.youtubeInput.value = localStorage.getItem('crm_youtube_key') || '';
+  DOM.youtubeInput.addEventListener('input', () => localStorage.setItem('crm_youtube_key', DOM.youtubeInput.value));
+  DOM.inpTwitchId.value = localStorage.getItem('crm_twitch_id') || '';
+  DOM.inpTwitchSecret.value = localStorage.getItem('crm_twitch_secret') || '';
+
+  [DOM.kfMinSubs, DOM.kfMaxSubs, DOM.kfHasContact].forEach(el => el.addEventListener('input', renderKanban));
+
+  function sysLog(msg, type = 'normal') {
+    const time = new Date().toLocaleTimeString('pt-BR', { hour12: false });
+    const line = document.createElement('div');
+    line.className = `log-line log-${type}`;
+    line.textContent = `[${time}] ${msg}`;
+    DOM.console.appendChild(line);
+    DOM.console.scrollTop = DOM.console.scrollHeight; 
+  }
+
+  function updateProgress(percent, text) {
+    DOM.progBar.style.width = `${percent}%`;
+    DOM.progPct.textContent = `${Math.floor(percent)}%`;
+    if (text) DOM.progText.textContent = text;
+  }
+
+  // ===================================================================
+  // MOTOR SEM SERVIDOR (versão mobile): todas as chamadas que antes
+  // passavam pelo server.js (Node) agora vão direto do navegador/WebView
+  // pras APIs oficiais, usando as chaves que você mesmo cola na tela.
+  // ===================================================================
+
+  async function youtubeSearchDirect(query, pages, gl, hl, apiKey, signal) {
+    let allVideos = [];
+    let pageToken = '';
+    for (let i = 0; i < pages; i++) {
+      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=50&regionCode=${gl}&relevanceLanguage=${hl}&key=${apiKey}${pageToken ? `&pageToken=${pageToken}` : ''}`;
+      const res = await fetch(url, { signal });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error?.message || 'Erro na busca do YouTube.');
+      const videos = (data.items || []).map(it => ({
+        videoId: it.id.videoId,
+        title: it.snippet.title,
+        author: { name: it.snippet.channelTitle },
+      }));
+      allVideos = allVideos.concat(videos);
+      if (!data.nextPageToken) break;
+      pageToken = data.nextPageToken;
+    }
+    return allVideos;
+  }
+
+  async function getTwitchTokenDirect(clientId, clientSecret, signal) {
+    const url = `https://id.twitch.tv/oauth2/token?client_id=${clientId}&client_secret=${clientSecret}&grant_type=client_credentials`;
+    const res = await fetch(url, { method: 'POST', signal });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Chaves da Twitch inválidas.");
+    return data.access_token;
+  }
+
+  async function twitchSearchDirect(query, clientId, clientSecret, signal) {
+    const token = await getTwitchTokenDirect(clientId, clientSecret, signal);
+    const searchUrl = `https://api.twitch.tv/helix/search/channels?query=${encodeURIComponent(query)}&live_only=true&first=100`;
+    const searchRes = await fetch(searchUrl, { headers: { 'Client-ID': clientId, 'Authorization': `Bearer ${token}` }, signal });
+    const searchData = await searchRes.json();
+    if (!searchData.data) return [];
+
+    const now = new Date();
+    const validStreams = [];
+    for (const stream of searchData.data) {
+      if (!stream.started_at) continue;
+      const startedAt = new Date(stream.started_at);
+      const uptimeMinutes = Math.floor((now - startedAt) / 60000);
+      if (uptimeMinutes > 240) continue;
+      if (validStreams.length >= 30) break;
+
+      let followers = 0;
+      try {
+        const followUrl = `https://api.twitch.tv/helix/channels/followers?broadcaster_id=${stream.id}`;
+        const followRes = await fetch(followUrl, { headers: { 'Client-ID': clientId, 'Authorization': `Bearer ${token}` }, signal });
+        const followData = await followRes.json();
+        followers = followData.total || 0;
+      } catch (e) {}
+
+      validStreams.push({
+        platform: 'twitch', channelId: stream.id, name: stream.display_name,
+        loginName: stream.broadcaster_login, avatar: stream.thumbnail_url || '',
+        subs: followers, videoTitle: stream.title, uptime: uptimeMinutes,
+        publishedAt: stream.started_at,
+        videoDesc: `Transmitindo: ${stream.game_name}. Título: "${stream.title}".`
+      });
+    }
+    return validStreams;
+  }
+
+  DOM.btnCopyLog.addEventListener('click', () => {
+    const lines = Array.from(DOM.console.querySelectorAll('.log-line')).map(el => el.textContent).join('\n');
+    navigator.clipboard.writeText(lines);
+    sysLog("Log copiado.", "success");
+  });
+
+  function formatNumber(num) {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num;
+  }
+
+  function getFallbackAvatar(name) {
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=18181b&color=10b981&size=88`;
+  }
+
+  function parseDurationToMinutes(duration) {
+    const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+    if (!match) return 0;
+    const h = parseInt(match[1]) || 0;
+    const m = parseInt(match[2]) || 0;
+    return (h * 60) + m;
+  }
+  
+  function calculateTimeAgo(dateString) {
+    if(!dateString) return "Data Desconhecida";
+    const then = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - then;
+    if (diffMs < 0) return "Postado Agora";
+
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    
+    if (diffMins < 60) return `Há ${diffMins} min`;
+    if (diffHours < 24) return `Há ${diffHours} hora(s)`;
+    if (diffDays === 1) return "Ontem";
+    if (diffDays < 30) return `Há ${diffDays} dias`;
+    const diffMonths = Math.floor(diffDays/30);
+    if (diffMonths < 12) return `Há ${diffMonths} mes(es)`;
+    return `Há ${Math.floor(diffMonths/12)} ano(s)`;
+  }
+
+  function extractSocialsRegex(text) {
+    const result = { twitter: null, instagram: null, twitch: null, discord: null };
+    if(!text) return result;
+    const twMatch = text.match(/(?:https?:\/\/)?(?:www\.)?(?:twitter\.com|x\.com)\/([a-zA-Z0-9_]+)/i);
+    if(twMatch) result.twitter = twMatch[1];
+    const igMatch = text.match(/(?:https?:\/\/)?(?:www\.)?instagram\.com\/([a-zA-Z0-9_.]+)/i);
+    if(igMatch) result.instagram = igMatch[1];
+    const twcMatch = text.match(/(?:https?:\/\/)?(?:www\.)?twitch\.tv\/([a-zA-Z0-9_]+)/i);
+    if(twcMatch) result.twitch = twcMatch[1];
+    const dcMatch = text.match(/(?:https?:\/\/)?(?:www\.)?(?:discord\.gg|discord\.com\/invite)\/([a-zA-Z0-9_]+)/i);
+    if(dcMatch) result.discord = dcMatch[1];
+    return result;
+  }
+
+  async function detectWorkingGeminiModel(apiKey, signal) {
+    try {
+      const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+      const res = await fetch(listUrl, { signal });
+      const data = await res.json();
+      if (res.ok && data.models) {
+        const supported = data.models.filter(m => (m.supportedGenerationMethods || []).includes("generateContent")).map(m => m.name.replace("models/", ""));
+        return supported.find(m => m.includes("flash")) || supported[0];
+      }
+    } catch (err) {}
+    return "gemini-1.5-flash-latest";
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str ?? '';
+    return div.innerHTML;
+  }
+
+  function getSocialHtml(tw, dc, ig, twc) {
+    let html = '<div class="social-container">';
+    let hasSocial = false;
+    if (tw && tw.toLowerCase() !== 'nulo' && tw.toLowerCase() !== 'null') {
+       html += `<a href="${tw.includes('http')?tw:'https://twitter.com/'+tw}" target="_blank" class="soc-badge soc-tw">Twitter</a>`; hasSocial = true;
+    }
+    if (ig && ig.toLowerCase() !== 'nulo' && ig.toLowerCase() !== 'null') {
+       html += `<a href="${ig.includes('http')?ig:'https://instagram.com/'+ig}" target="_blank" class="soc-badge soc-ig">Insta</a>`; hasSocial = true;
+    }
+    if (twc && twc.toLowerCase() !== 'nulo' && twc.toLowerCase() !== 'null') {
+       html += `<a href="${twc.includes('http')?twc:'https://twitch.tv/'+twc}" target="_blank" class="soc-badge soc-twc">Twitch</a>`; hasSocial = true;
+    }
+    if (dc && dc.toLowerCase() !== 'nulo' && dc.toLowerCase() !== 'null') {
+       html += `<span class="soc-badge soc-dc">Discord</span>`; hasSocial = true;
+    }
+    if (!hasSocial) html += `<span class="soc-badge soc-none">Nenhuma Rede</span>`;
+    html += '</div>';
+    return html;
+  }
+
+  DOM.viewBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      DOM.viewBtns.forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      DOM.grid.className = e.target.getAttribute('data-view'); 
+    });
+  });
+
+  DOM.tabLive.addEventListener('click', () => {
+    DOM.tabLive.classList.add('active'); DOM.tabHistory.classList.remove('active');
+    DOM.liveView.classList.add('active'); DOM.historyView.classList.remove('active');
+    DOM.viewControlsLive.style.display = 'flex';
+  });
+
+  DOM.tabHistory.addEventListener('click', () => {
+    DOM.tabHistory.classList.add('active'); DOM.tabLive.classList.remove('active');
+    DOM.liveView.classList.remove('active'); DOM.historyView.classList.add('active');
+    DOM.viewControlsLive.style.display = 'none';
+    renderKanban();
+  });
+
+  window.updateLeadStatus = function(id, selectElement) {
+    const lead = approvedLeads.find(l => l.id === id);
+    if (lead) { lead.status = selectElement.value; localStorage.setItem('crm_leads', JSON.stringify(approvedLeads)); renderKanban(); }
+  };
+
+  window.toggleFav = function(id) {
+    const lead = approvedLeads.find(l => l.id === id);
+    if (lead) { lead.favorite = !lead.favorite; localStorage.setItem('crm_leads', JSON.stringify(approvedLeads)); renderKanban(); }
+  };
+
+  function renderKanban() {
+    ['canal', 'contacted', 'negotiating', 'closed'].forEach(col => { document.getElementById(`col-${col}`).innerHTML = ''; document.getElementById(`count-${col}`).textContent = '0'; });
+    if (approvedLeads.length === 0) return;
+
+    const minS = parseInt(DOM.kfMinSubs.value) || 0;
+    const maxS = parseInt(DOM.kfMaxSubs.value) || 9999999999;
+    const requireContact = DOM.kfHasContact.checked;
+
+    approvedLeads.forEach(lead => {
+      if (lead.subs < minS || lead.subs > maxS) return;
+      
+      const hasTw = lead.twitter && lead.twitter.toLowerCase() !== 'nulo' && lead.twitter.toLowerCase() !== 'null';
+      const hasDc = lead.discord && lead.discord.toLowerCase() !== 'nulo' && lead.discord.toLowerCase() !== 'null';
+      const hasIg = lead.instagram && lead.instagram.toLowerCase() !== 'nulo' && lead.instagram.toLowerCase() !== 'null';
+      const hasTwc = lead.twitch && lead.twitch.toLowerCase() !== 'nulo' && lead.twitch.toLowerCase() !== 'null';
+      if (requireContact && !(hasTw || hasDc || hasIg || hasTwc)) return; 
+
+      const colId = lead.status || 'canal';
+      const colDiv = document.getElementById(`col-${colId}`);
+      if (!colDiv) return;
+
+      const card = document.createElement('div');
+      card.className = `kanban-card ${lead.favorite ? 'fav' : ''}`;
+      const fallbackUrl = getFallbackAvatar(lead.name);
+      card.innerHTML = `
+        <button class="btn-fav ${lead.favorite ? 'active' : ''}" onclick="window.toggleFav('${lead.id}')">★</button>
+        <div style="display:flex; align-items:center; gap: 12px; margin-bottom: 12px;">
+          <a href="${lead.url}" target="_blank"><img src="${lead.avatar}" onerror="this.src='${fallbackUrl}'" class="avatar"></a>
+          <div>
+            <h3><a href="${lead.url}" target="_blank">${lead.name}</a></h3>
+            <span style="font-size:11px; color:var(--text-muted);">${formatNumber(lead.subs)} seguidores</span>
+          </div>
+        </div>
+        <div style="background: var(--bg-base); border: 1px solid var(--border-light); padding: 8px 10px; border-radius: 6px; font-size: 11px; line-height: 1.4; color: var(--text-main); margin-bottom: 12px;">${lead.icebreaker || 'Sem informações.'}</div>
+        ${getSocialHtml(lead.twitter, lead.discord, lead.instagram, lead.twitch)}
+        <select class="status-select" onchange="window.updateLeadStatus('${lead.id}', this)">
+          <option value="canal" ${colId === 'canal' ? 'selected' : ''}>📋 Novo</option>
+          <option value="contacted" ${colId === 'contacted' ? 'selected' : ''}>💬 Abordado</option>
+          <option value="negotiating" ${colId === 'negotiating' ? 'selected' : ''}>✂️ Teste</option>
+          <option value="closed" ${colId === 'closed' ? 'selected' : ''}>🤝 Fechado</option>
+        </select>
+      `;
+      colDiv.appendChild(card);
+    });
+    ['canal', 'contacted', 'negotiating', 'closed'].forEach(col => { document.getElementById(`count-${col}`).textContent = document.getElementById(`col-${col}`).children.length; });
+  }
+
+  DOM.btnClear.addEventListener('click', () => {
+    if(confirm("Apagar todos os dados salvos?")) { localStorage.clear(); seenChannels.clear(); approvedLeads = []; location.reload(); }
+  });
+
+  function renderCardUI(channelId, name, avatar, subs, platform, url, waitingText = "Analisando...") {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.id = `card-${channelId}`;
+    const fallbackUrl = getFallbackAvatar(name);
+    card.innerHTML = `
+      <div class="badge descartado">${waitingText}</div>
+      <a href="${url}" target="_blank" rel="noopener"><img src="${avatar}" onerror="this.src='${fallbackUrl}'" class="avatar"></a>
+      <div class="card-info">
+        <h3><a href="${url}" target="_blank" rel="noopener">${escapeHtml(name)}</a></h3>
+        <div class="subs-count">${formatNumber(subs)} ${platform === 'twitch' ? 'seguidores' : 'subs'}</div>
+      </div>
+      <div class="analysis-box" id="ai-${channelId}">Processando...</div>
+    `;
+    DOM.grid.appendChild(card);
+  }
+
+  async function processGemini(v, geminiKey, targetLang, signal) {
+    const cardEl = document.getElementById(`card-${v.channelId}`);
+    try {
+      if (cardEl) cardEl.querySelector('.badge').textContent = "Avaliando IA...";
+
+      const prompt = `Atue como caçador de talentos B2B para EDIÇÃO DE VÍDEO.
+      1. IDIOMA: O criador deve falar ${targetLang.toUpperCase()}.
+      2. ANTI-IA: Se parecer canal faceless automatizado, reprove.
+      3. REGRAS: Se for gameplay autêntica, aprove.
+      4. REDES: Extraia Twitter/X, Discord, Instagram e Twitch da descrição.
+      5. ICEBREAKER: Crie uma frase natural elogiando o estilo em ${targetLang.toUpperCase()}.
+      CONTEXTO: ${v.videoDesc}
+      Responda JSON: {"approved": true/false, "reason": "motivo pt-BR", "icebreaker": "frase", "twitter":"nulo", "instagram":"nulo", "twitch":"${v.platform === 'twitch' ? v.name : 'nulo'}", "discord":"nulo"}`;
+      
+      let gData;
+      let attempt = 1;
+      while(attempt <= 4) {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${workingModel}:generateContent?key=${geminiKey}`, {
+            method: 'POST', headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } }),
+            signal: signal
+          });
+          gData = await res.json();
+          if (res.status === 429 || (gData.error?.message || '').includes('quota')) {
+            const waitMs = 15000 * attempt;
+            sysLog(`Limite IA. Pausa de ${waitMs/1000}s...`, 'warn');
+            await new Promise((r, rej) => {
+                const t = setTimeout(r, waitMs);
+                signal.addEventListener('abort', () => { clearTimeout(t); rej(new DOMException('Aborted', 'AbortError')); });
+            });
+            attempt++; continue;
+          }
+          if(!res.ok) throw new Error(gData.error?.message);
+          break;
+      }
+
+      const rawText = gData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error("Erro na formatação da IA.");
+      
+      const aiResponse = JSON.parse(jsonMatch[0]);
+
+      if (aiResponse.approved) {
+        if (cardEl) { const badge = cardEl.querySelector('.badge'); badge.className = 'badge'; badge.textContent = 'Oportunidade'; }
+        sysLog(`✅ Aprovado: ${v.name}`, 'success');
+        const timeAgo = calculateTimeAgo(v.publishedAt);
+        const reasonText = `[Vídeo Recente: ${timeAgo}] ` + aiResponse.reason;
+        saveAndRenderLead(v, reasonText, aiResponse.icebreaker, aiResponse.twitter, aiResponse.discord, aiResponse.instagram, aiResponse.twitch);
+      } else {
+        if (cardEl) cardEl.remove();
+        sysLog(`🚫 Rejeitado (${v.name}): ${aiResponse.reason}`, 'info');
+      }
+    } catch (e) {
+      if (e.name === 'AbortError') throw e; 
+      if (cardEl) { cardEl.querySelector('.badge').textContent = 'Erro IA'; cardEl.querySelector('.badge').style.background = 'rgba(239, 68, 68, 0.1)'; cardEl.querySelector('.badge').style.color = 'var(--error)'; }
+      sysLog(`⚠ Erro IA (${v.name}): ${e.message}`, 'error');
+    }
+  }
+
+  function processFast(v) {
+      const cardEl = document.getElementById(`card-${v.channelId}`);
+      try {
+          const socials = extractSocialsRegex(v.videoDesc);
+          if(v.platform === 'twitch') socials.twitch = v.loginName;
+
+          const timeAgo = calculateTimeAgo(v.publishedAt);
+          const shortDesc = (v.videoDesc || '').substring(0, 140) + '...';
+          const reason = `Análise Express: ${v.platform.toUpperCase()} - Última Atividade: ${timeAgo}`;
+          const icebreaker = `Último título: "${v.videoTitle}". Resumo desc: ${shortDesc}`;
+
+          if (cardEl) { const badge = cardEl.querySelector('.badge'); badge.className = 'badge'; badge.textContent = timeAgo; }
+          sysLog(`⚡ Aprovado (Rápido): ${v.name}`, 'success');
+          saveAndRenderLead(v, reason, icebreaker, socials.twitter, socials.discord, socials.instagram, socials.twitch);
+      } catch(e) {
+          sysLog(`⚠ Erro (${v.name}): ${e.message}`, 'error');
+      }
+  }
+
+  function saveAndRenderLead(v, reason, icebreaker, tw, dc, ig, twc) {
+      const canalUrl = v.platform === 'twitch' ? `https://twitch.tv/${v.loginName}` : `https://youtube.com/channel/${v.channelId}`;
+      approvedLeads.push({
+        id: v.channelId, name: v.name, url: canalUrl, subs: v.subs, avatar: v.avatar, videoTitle: v.videoTitle,
+        reason: reason, icebreaker: icebreaker, twitter: tw, discord: dc, instagram: ig, twitch: twc,
+        status: 'canal', favorite: false
+      });
+      localStorage.setItem('crm_leads', JSON.stringify(approvedLeads));
+      
+      const aiBox = document.getElementById(`ai-${v.channelId}`);
+      if (aiBox) {
+        aiBox.innerHTML = `<strong>Info:</strong> ${escapeHtml(reason)}<div class="icebreaker">${escapeHtml(icebreaker)}</div>${getSocialHtml(tw, dc, ig, twc)}`;
+      }
+  }
+
+  DOM.btnCancel.addEventListener('click', () => {
+    if (currentAbortController) {
+      currentAbortController.abort();
+      sysLog("🛑 Busca interrompida pelo usuário.", "warn");
+    }
+  });
+
+  DOM.btnStart.addEventListener('click', async () => {
+    const platform = DOM.inpSource.value;
+    const isTwitter = platform === 'twitter';
+    
+    if (isTwitter) {
+        const lang = DOM.inpLang.value;
+        let terms = '';
+        if(lang === 'inglês') terms = '(%22looking%20for%20a%20video%20editor%22%20OR%20%22need%20a%20video%20editor%22)';
+        else if (lang === 'espanhol') terms = '(%22busco%20editor%20de%20video%22%20OR%20%22necesito%20editor%20de%20video%22)';
+        else terms = '(%22preciso%20de%20editor%20de%20video%22%20OR%20%22procura-se%20editor%22)';
+        window.open(`https://twitter.com/search?q=${terms}&f=live`, '_blank');
+        return;
+    }
+
+    const analysisMode = DOM.inpAnalysisMode.value;
+    const isTwitch = platform === 'twitch';
+    const geminiKey = DOM.geminiInput.value.trim();
+    const youtubeKey = DOM.youtubeInput.value.trim();
+
+    if (analysisMode === 'gemini' && !geminiKey) return alert("Insira sua chave API do Gemini.");
+    if (!isTwitch && platform !== 'twitter' && !youtubeKey) return alert("Insira sua chave API do YouTube Data v3.");
+
+    const twitchId = DOM.inpTwitchId.value.trim();
+    const twitchSecret = DOM.inpTwitchSecret.value.trim();
+    if (isTwitch && (!twitchId || !twitchSecret)) { sysLog("Preencha as credenciais Twitch.", "error"); return; }
+
+    localStorage.setItem('crm_key', geminiKey);
+    localStorage.setItem('crm_youtube_key', youtubeKey);
+    if (isTwitch) { localStorage.setItem('crm_twitch_id', twitchId); localStorage.setItem('crm_twitch_secret', twitchSecret); }
+
+    DOM.btnStart.style.display = 'none';
+    DOM.panelProgress.style.display = 'flex';
+    DOM.grid.innerHTML = ''; 
+    DOM.tabLive.click();
+    updateProgress(0, "Preparando motores...");
+    sysLog(`--- NOVA BUSCA INICIADA ---`, 'info');
+    
+    currentAbortController = new AbortController();
+    const signal = currentAbortController.signal;
+
+    try {
+      if (analysisMode === 'gemini' && !workingModel) {
+         updateProgress(5, "Conectando IA...");
+         workingModel = await detectWorkingGeminiModel(geminiKey, signal);
+      }
+
+      const targetLang = DOM.inpLang.value;
+      const minSubs = parseInt(DOM.inpMinSubs.value) || 0;
+      const maxSubs = parseInt(DOM.inpMaxSubs.value) || 999999999;
+      const maxResults = parseInt(DOM.inpMaxResults.value) || 8;
+      const searchPages = Math.min(parseInt(DOM.inpPages.value) || 4, 10);
+      const maxDurationMin = parseInt(DOM.inpMaxDuration.value) || 240;
+
+      let queue = [];
+
+      if (isTwitch) {
+        updateProgress(20, "Conectando aos servidores Twitch...");
+        const queryTwitch = document.getElementById('inp-queries').value || 'Minecraft';
+        
+        const streams = await twitchSearchDirect(queryTwitch, twitchId, twitchSecret, signal);
+        
+        updateProgress(50, "Filtrando os melhores streamers...");
+        for (const s of streams) {
+          if (queue.length >= maxResults) break;
+          if (seenChannels.has(s.channelId)) continue;
+          if (s.subs < minSubs || s.subs > maxSubs) continue;
+          if (s.uptime > maxDurationMin) continue;
+
+          seenChannels.add(s.channelId);
+          queue.push(s);
+          renderCardUI(s.channelId, s.name, s.avatar, s.subs, 'twitch', `https://twitch.tv/${s.loginName}`, analysisMode === 'fast' ? "Aguardando..." : "Fila da IA...");
+        }
+
+      } else {
+        const baseQueries = document.getElementById('inp-queries').value.split('\n').filter(q => q.trim());
+        const excluded = document.getElementById('inp-excluded').value.toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
+        
+        // MODIFICADORES DO "MODO COLHEITADEIRA" (Para garantir que ache a meta)
+        const modifiers = ["", "gameplay", "ep 1", "part 1", "playthrough", "let's play", "iniciante", "dicas", "ao vivo", "live", "cortes", "highlights", "engraçado", "survival", "modpack", "hardcore"];
+        
+        let totalSteps = baseQueries.length * modifiers.length;
+        let currentStep = 0;
+
+        for (const baseQuery of baseQueries) {
+          if (queue.length >= maxResults) break;
+
+          for (const mod of modifiers) {
+            if (queue.length >= maxResults) break;
+            
+            currentStep++;
+            let finalQuery = `${baseQuery} ${mod}`.trim();
+            updateProgress((currentStep / totalSteps) * 50, `Procurando: ${finalQuery}`);
+
+            const videos = await youtubeSearchDirect(finalQuery, searchPages, 'US', 'en', youtubeKey, signal).catch(() => []);
+
+            for (const video of videos) {
+              if (queue.length >= maxResults) break; 
+              if (!video.videoId || !video.author) continue;
+              if (excluded.some(ex => (video.title || '').toLowerCase().includes(ex))) continue;
+
+              const vidRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${video.videoId}&key=${youtubeKey}`, { signal });
+              const vidData = await vidRes.json();
+              if (!vidRes.ok || !vidData.items || vidData.items.length === 0) continue;
+
+              const snippet = vidData.items[0].snippet;
+              const duration = parseDurationToMinutes(vidData.items[0].contentDetails.duration);
+              if (duration > maxDurationMin || duration === 0) continue;
+
+              const channelId = snippet.channelId;
+              if (seenChannels.has(channelId)) continue;
+
+              const chRes = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${channelId}&key=${youtubeKey}`, { signal });
+              const chData = await chRes.json();
+              if (!chRes.ok || !chData.items || chData.items.length === 0) continue;
+
+              const subs = parseInt(chData.items[0].statistics.subscriberCount || 0);
+              if (subs < minSubs || subs > maxSubs) continue;
+
+              let actualLatestDate = snippet.publishedAt; 
+              try {
+                  const uploadsPlaylistId = channelId.replace('UC', 'UU');
+                  const latestVidRes = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=1&key=${youtubeKey}`, { signal });
+                  const latestVidData = await latestVidRes.json();
+                  if (latestVidData.items && latestVidData.items.length > 0) {
+                      actualLatestDate = latestVidData.items[0].snippet.publishedAt;
+                  }
+              } catch (e) {}
+
+              seenChannels.add(channelId);
+              const avatar = chData.items[0].snippet.thumbnails.high?.url || '';
+
+              queue.push({
+                platform: 'youtube', channelId, name: video.author.name, avatar, subs,
+                videoTitle: video.title, publishedAt: actualLatestDate, videoDesc: (snippet.description || '').substring(0, 3000)
+              });
+
+              renderCardUI(channelId, video.author.name, avatar, subs, 'youtube', `https://youtube.com/channel/${channelId}`, analysisMode === 'fast' ? "Aguardando..." : "Fila da IA...");
+            }
+          }
+        }
+      }
+
+      localStorage.setItem('crm_seen', JSON.stringify([...seenChannels]));
+
+      if (queue.length > 0) {
+        let itemsDone = 0;
+        sysLog(`Processando ${queue.length} contatos encontrados...`, 'info');
+        
+        for (const item of queue) {
+          updateProgress(50 + ((itemsDone / queue.length) * 50), `Mapeando redes de: ${item.name}`);
+          
+          if (analysisMode === 'gemini') {
+              await processGemini(item, geminiKey, targetLang, signal);
+              await new Promise((r, rej) => {
+                  const t = setTimeout(r, 4000);
+                  signal.addEventListener('abort', () => { clearTimeout(t); rej(new DOMException('Aborted', 'AbortError')); });
+              });
+          } else {
+              processFast(item);
+              await new Promise(r => setTimeout(r, 100)); 
+          }
+          itemsDone++;
+        }
+        updateProgress(100, "Concluído com Sucesso!");
+      } else {
+        updateProgress(100, "Busca Finalizada.");
+        sysLog("A busca terminou, mas os filtros foram muito restritivos. Tente baixar o Min. Subs ou aumentar o Limite (Minutos).", "warn");
+      }
+
+    } catch (err) {
+      if (err.name === 'AbortError') {
+         updateProgress(100, "Cancelado.");
+      } else {
+         sysLog(`Erro do sistema: ${err.message}`, 'error');
+         updateProgress(100, "Erro Crítico.");
+      }
+    } finally {
+      setTimeout(() => {
+        DOM.btnStart.style.display = 'flex';
+        DOM.panelProgress.style.display = 'none';
+        DOM.btnStart.disabled = false;
+        currentAbortController = null;
+      }, 1500); // Dá 1.5s pra você ler que acabou antes do botão voltar
+    }
+  });
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>

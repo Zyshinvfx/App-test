@@ -1,0 +1,93 @@
+SPREAD THE GREEN — APP MOBILE (build automático via GitHub)
+================================================================
+
+Isso monta o .apk pra você automaticamente na nuvem do GitHub, sem
+precisar instalar Android Studio nem nada pesado no seu PC.
+
+
+PASSO 1 — Criar o repositório
+--------------------------------
+1. Entre no GitHub (github.com) já logado na sua conta.
+2. Clique no "+" no canto superior direito → "New repository".
+3. Dê um nome, por exemplo: spread-the-green-mobile
+4. Pode deixar como "Private" (só você vê) ou "Public", tanto faz.
+5. NÃO marque nenhuma opção de "Add a README" — deixe o repositório
+   vazio mesmo. Clique em "Create repository".
+
+
+PASSO 2 — Subir esta pasta pro repositório
+----------------------------------------------
+Você tem duas formas de fazer isso. Escolha a que preferir:
+
+### Opção A — Pelo site do GitHub (mais fácil, sem instalar nada)
+1. Descompacte o arquivo spread-the-green-mobile.zip no seu computador.
+2. Na página do repositório que você acabou de criar, clique no link
+   "uploading an existing file".
+3. Arraste TODOS os arquivos e pastas de dentro da pasta descompactada
+   (incluindo a pasta oculta ".github" — no Windows, se ela não
+   aparecer, ative "Itens ocultos" no Explorador de Arquivos antes de
+   arrastar).
+4. Role pra baixo, escreva uma mensagem tipo "primeira versão" e
+   clique em "Commit changes".
+
+### Opção B — Usando Git na linha de comando (se já tiver o Git instalado)
+   git init
+   git add .
+   git commit -m "primeira versão"
+   git branch -M main
+   git remote add origin https://github.com/SEU-USUARIO/spread-the-green-mobile.git
+   git push -u origin main
+
+
+PASSO 3 — Acompanhar o build
+--------------------------------
+1. Assim que o upload terminar, clique na aba "Actions" no topo do
+   repositório.
+2. Vai aparecer um processo chamado "Build APK" rodando (bolinha
+   amarela girando). Isso demora uns 3 a 5 minutos.
+3. Quando terminar, a bolinha fica verde (✔). Se ficar vermelha (✘),
+   algo deu errado — me manda print da tela que eu ajudo a
+   diagnosticar.
+
+
+PASSO 4 — Baixar o APK pronto
+----------------------------------
+1. Clique em cima do build verde que terminou.
+2. Role até a seção "Artifacts" (bem embaixo da página).
+3. Clique em "SpreadTheGreen-apk" pra baixar um .zip.
+4. Dentro desse .zip vem o arquivo app-debug.apk — esse é o app.
+5. Transfira esse .apk pro seu celular (por e-mail, WhatsApp Web,
+   Google Drive, cabo USB, o que for mais fácil) e abra ele no
+   celular pra instalar.
+6. O Android vai avisar "instalação de fontes desconhecidas
+   bloqueada" na primeira vez — é só permitir para esse arquivo
+   específico (a mesma lógica do aviso do Windows que já vimos).
+
+
+SOBRE A CHAVE DO YOUTUBE E O LIMITE DE COTA
+------------------------------------------------
+Diferente do programa do PC, esse app mobile não tem um servidor
+protegendo a chave do YouTube — você mesmo cola sua chave direto na
+tela do app (igual já faz com a chave do Gemini). Isso tem um efeito
+colateral importante: a busca agora usa a API oficial de busca do
+YouTube, que custa 100 unidades de cota por página buscada (antes,
+no PC, a busca ampla não gastava cota nenhuma). Com o limite padrão
+de 10.000 unidades por dia, você tem bem menos buscas por dia no
+celular do que tinha no PC. Comecei o campo "Páginas" já em 1 por
+causa disso.
+
+
+SOBRE A TWITCH
+-------------------
+Não tive como testar se a Twitch permite autenticação direto do
+navegador/celular sem servidor por trás (isso depende de política de
+CORS deles). Pode ser que a busca por Twitch simplesmente não
+funcione nessa versão mobile. Se isso acontecer, me avise o que
+aparece no log de erro que a gente vê uma alternativa.
+
+
+SE QUISER MUDAR ALGO DEPOIS
+--------------------------------
+Toda vez que eu (ou você) mudar algo no código e você subir de novo
+pro GitHub (outro "commit"), o Actions builda um .apk novo sozinho —
+é só repetir o Passo 3 e 4 pra pegar a versão atualizada.

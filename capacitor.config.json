@@ -1,0 +1,9 @@
+{
+  "appId": "com.spreadthegreen.prospector",
+  "appName": "Spread The Green",
+  "webDir": "www",
+  "backgroundColor": "#09090b",
+  "android": {
+    "backgroundColor": "#09090b"
+  }
+}
